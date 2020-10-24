@@ -1,24 +1,83 @@
 module.exports = function toReadable (number) {
-  
-        const first = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
-        const tens = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
-        const mad = ['', 'thousand', 'million', 'billion', 'trillion'];
-        let word = '';
+
+        if (typeof number === 'string') {
+          number = parseInt(number, 10);
+        }
+        if (typeof number === 'number' && !isNaN(number) && isFinite(number)) {
+          number = number.toString(10);
+        } 
+        else {
+          return 'This is not a valid number';
+        }
       
-        for (let i = 0; i < mad.length; i++) {
-          let tempNumber = number%(100*Math.pow(1000,i));
-          if (Math.floor(tempNumber/Math.pow(1000,i)) !== 0) {
-            if (Math.floor(tempNumber/Math.pow(1000,i)) < 20) {
-              word = first[Math.floor(tempNumber/Math.pow(1000,i))] + mad[i] + ' ' + word;
-            } else {
-              word = tens[Math.floor(tempNumber/(10*Math.pow(1000,i)))] + '-' + first[Math.floor(tempNumber/Math.pow(1000,i))%10] + mad[i] + ' ' + word;
+        
+        var digits = number.split('');
+        var digitsNeeded = 3 - digits.length % 3;
+        if (digitsNeeded !== 3) { 
+          while (digitsNeeded > 0) {
+            digits.unshift('0');
+            digitsNeeded--;
+          }
+        }
+      
+        
+        var digitsGroup = [];
+        var numberOfGroups = digits.length / 3;
+        for (var i = 0; i < numberOfGroups; i++) {
+          digitsGroup[i] = digits.splice(0, 3);
+        }
+        console.log(digitsGroup) 
+      
+        var digitsGroupLen = digitsGroup.length;
+        var numTxt = [
+          [null,'one','two','three','four','five','six','seven','eight','nine'], 
+          [null, 'ten', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'], 
+          [null,'one','two','three','four','five','six','seven','eight','nine'] 
+        ];
+        var tenthsDifferent = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen']
+      
+       
+        for (var j = 0; j < digitsGroupLen; j++) {
+          for (var k = 0; k < 3; k++) {
+            var currentValue = digitsGroup[j][k];
+            digitsGroup[j][k] = numTxt[k][currentValue]
+            if (k === 0 && currentValue !== '0') {
+              digitsGroup[j][k] += ' hundred ';
+            } 
+            else if (k === 1 && currentValue === '1') { 
+              digitsGroup[j][k] = tenthsDifferent[digitsGroup[j][2]];
+              digitsGroup[j][2] = 0; 
             }
           }
-      
-          tempNumber = number%(Math.pow(1000,i+1));
-          if (Math.floor(tempNumber/(100*Math.pow(1000,i))) !== 0) word = first[Math.floor(tempNumber/(100*Math.pow(1000,i)))] + 'hunderd ' + word;
         }
-          return word;
       
-}
-
+        console.log(digitsGroup) 
+      
+        
+        for (var l = 0; l < digitsGroupLen; l++) {
+          if (digitsGroup[l][1] && digitsGroup[l][2]) {
+            digitsGroup[l][1] += ' ';
+          }
+          digitsGroup[l].filter(function (e) {return e !== null});
+          digitsGroup[l] = digitsGroup[l].join('');
+        }
+      
+        console.log(digitsGroup) 
+      
+        
+        var posfix = [null,'thousand','million','billion','trillion','quadrillion','quintillion','sextillion'];
+        if (digitsGroupLen > 1) {
+          var posfixRange = posfix.splice(0, digitsGroupLen).reverse();
+          for (var m = 0; m < digitsGroupLen - 1; m++) { 
+            if(digitsGroup[m]){ 
+              digitsGroup[m] += ' ' + posfixRange[m];
+            }
+          }
+        }
+      
+        console.log(digitsGroup) 
+      
+        
+        return digitsGroup.join(' ')
+      
+      }; 
